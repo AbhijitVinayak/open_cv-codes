@@ -1,14 +1,16 @@
 import cv2
 import numpy as np
 
-filename = 'chessboard2.jpg'
+filename = 'image.png'
 img = cv2.imread(filename)
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
 # find Harris corners
 gray = np.float32(gray)
-dst = cv2.cornerHarris(gray,2,3,0.04)
+dst = cv2.cornerHarris(gray,2,7,0.04)
 dst = cv2.dilate(dst,None)
+
+'''
 ret, dst = cv2.threshold(dst,0.01*dst.max(),255,0)
 dst = np.uint8(dst)
 
@@ -25,4 +27,10 @@ res = np.int0(res)
 img[res[:,1],res[:,0]]=[0,0,255]
 img[res[:,3],res[:,2]] = [0,255,0]
 
-cv2.imwrite('subpixel5.png',img)
+cv2.imshow('corner',img)
+cv2.waitKey(0)'''
+img[dst>0.01*dst.max()]=[0,0,255]
+
+cv2.imshow('dst',img)
+if cv2.waitKey(0) & 0xff == 27:
+    cv2.destroyAllWindows()
