@@ -8,7 +8,7 @@ import pandas as pd
 from shapely.geometry import LineString
 import operator
 def main():
-    src=cv2.imread('./imagesRGB/RGB96.png')
+    src=cv2.imread('./imagesRGB/RGB01.png')
     #src=cv2.imread('stair4.jpg')
     gray= cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
     #cv2.imshow('gray',gray)
@@ -30,7 +30,7 @@ def main():
     horizontal= cv2.dilate(horizontal,kernel,iterations=1)
     horizontal= cv2.erode(horizontal,horizontalStructure,iterations=2)
     # Show extracted horizontal lines
-    #cv2.imshow('horizontal',horizontal)
+    cv2.imshow('horizontal',horizontal)
 
     '''
     lines= cv2.HoughLinesP(horizontal,1,math.pi/180,1, 150, 50)
@@ -41,7 +41,7 @@ def main():
             cv2.line(src, (x1,y1),(x2,y2),(0,255,0),2)
     '''
     lines=cv2.HoughLines(horizontal,1,math.pi/70,250)
-    #print(len(lines))
+    #print(lines)
     rhofilter=np.copy(src)
     lines_points = []
     rho_window=11
@@ -53,6 +53,7 @@ def main():
     if lines is not None:
         lines= np.reshape(lines, [-1,2])
         lines_sorted=lines[lines[:,0].argsort()]
+        print(lines_sorted)
 
         pos=0
         for i in range(0,len(lines_sorted)-1):
@@ -158,7 +159,21 @@ def main():
     #print("count is " + str(count))
     final=cv2.bitwise_and(col,col, mask=horizontal)
     #cv2.imshow('final',final)
-    #print(final_lines)
+    #print(len(final_lines))
+
+    ##JUGAADDU CODE. NEEDS ITERATION
+
+    mid_point=[]
+    col_bw=cv2.inRange(final,(254,0,0),(255,0,0))
+    line_final = cv2.HoughLinesP(col_bw,rho= 1, theta= np.pi/180,threshold=40,minLineLength=150,maxLineGap=20)
+    for line in line_final:
+        for x1,y1,x2,y2 in line:
+            cv2.line(src,(x1,y1),(x2,y2),(0,0,255),2)
+            mid_point.append([(x1+x2)/2,(y1+y2)/2])
+            cv2.circle(src, ((x1+x2)/2,(y1+y2)/2), 2, (0,255,0),-1)
+    cv2.imshow('dst',src)
+
+
     '''
     print(theta_median_arr)
     theta_degrees=np.degrees(theta_median_arr)
@@ -218,8 +233,8 @@ def main():
                     u_y=j
                 elif j>b_y:
                     b_y=j
-    print(u_y)
-    print(b_y)
+    #print(u_y)
+    #print(b_y)
     bound=src.copy()
 
     cv2.line(bound, (l,u_y),(l,b_y),(0,255,0),2)
